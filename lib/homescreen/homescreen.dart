@@ -33,7 +33,7 @@ class _HomescreenState extends State<Homescreen> {
       setState(() {
         final transactionJson = json.decode(response.body);
         transaction = List<Transaction>.from(
-            transactionJson.map((person) => Transaction.fromJson(person)));
+            transactionJson.map((data) => Transaction.fromJson(data)));
       });
     }
   }
@@ -148,10 +148,10 @@ class _HomescreenState extends State<Homescreen> {
                                 shrinkWrap: true,
                                 itemCount: transaction!.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  final data = transaction![index];
+                                  final datas = transaction![index];
                                   return ListTile(
-                                    title: Text(data.transactionId),
-                                    subtitle: Text('Amount: ${data.amount}'),
+                                    title: Text(datas.transactionId),
+                                    subtitle: Text('Amount: ${datas.amount}'),
                                   );
                                 },
                               ),
