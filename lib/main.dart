@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:walletapp/chatpage/chatscreen.dart';
 import 'package:walletapp/homescreen/homescreen.dart';
+import 'package:walletapp/loginpage.dart';
 import 'package:walletapp/profilePage.dart';
 import 'package:walletapp/qrcode.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
                     if (snapshot.hasData) {
                       return const WalletApp();
                     }
-                    return const AuthGate();
+                    return const LoginPage();
                   },
                 ),
               ),

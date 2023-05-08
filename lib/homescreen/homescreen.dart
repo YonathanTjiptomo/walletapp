@@ -5,7 +5,9 @@ import 'package:walletapp/homescreen/notificationScreen.dart';
 import 'package:walletapp/homescreen/topupScreen.dart';
 import 'package:walletapp/models/viewTransactionModel.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
+// ignore: must_be_immutable
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
 
@@ -14,12 +16,34 @@ class Homescreen extends StatefulWidget {
 }
 
 class _HomescreenState extends State<Homescreen> {
-  List<Transaction>? transaction;
+  // ignore: unused_field
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  List<Transactions>? transaction;
+  int amount = 0;
 
   @override
   void initState() {
     super.initState();
     getData();
+    _getMoney();
+  }
+
+  Future<void> _getMoney() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user found.');
+    }
+    final response = await http.get(Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint2}/get?uid=${user.uid}'));
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final amount = json['amount'] as int;
+      setState(() {
+        this.amount = amount;
+      });
+    } else {
+      throw Exception('Failed to load money');
+    }
   }
 
   Future<void> getData() async {
@@ -32,8 +56,8 @@ class _HomescreenState extends State<Homescreen> {
     if (response.statusCode == 200) {
       setState(() {
         final transactionJson = json.decode(response.body);
-        transaction = List<Transaction>.from(
-            transactionJson.map((data) => Transaction.fromJson(data)));
+        transaction = List<Transactions>.from(
+            transactionJson.map((data) => Transactions.fromJson(data)));
       });
     }
   }
@@ -43,12 +67,7 @@ class _HomescreenState extends State<Homescreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 240, 172, 27),
-        title: const Text("Rp.0"),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: 25,
-        ),
+        title: Text("Rp.$amount"),
         actions: <Widget>[
           IconButton(
               padding: const EdgeInsets.only(right: 20),

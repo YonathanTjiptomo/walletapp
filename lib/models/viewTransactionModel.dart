@@ -2,14 +2,14 @@
 
 import 'dart:convert';
 
-List<Transaction> transactionFromJson(String str) => List<Transaction>.from(
-    json.decode(str).map((x) => Transaction.fromJson(x)));
+List<Transactions> transactionFromJson(String str) => List<Transactions>.from(
+    json.decode(str).map((x) => Transactions.fromJson(x)));
 
-String transactionToJson(List<Transaction> data) =>
+String transactionsToJson(List<Transactions> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class Transaction {
-  Transaction({
+class Transactions {
+  Transactions({
     required this.id,
     required this.transactionId,
     required this.amount,
@@ -29,7 +29,7 @@ class Transaction {
   String description;
   int status;
 
-  factory Transaction.fromJson(Map<String, dynamic> json) => Transaction(
+  factory Transactions.fromJson(Map<String, dynamic> json) => Transactions(
         id: json["id"],
         transactionId: json["transactionId"],
         amount: json["amount"],
