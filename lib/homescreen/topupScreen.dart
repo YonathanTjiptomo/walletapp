@@ -1,8 +1,10 @@
 // ignore_for_file: file_names
 
-import 'dart:math';
-
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:walletapp/apiConstant.dart';
 
 class TopupScreen extends StatefulWidget {
   const TopupScreen({super.key});
@@ -12,12 +14,34 @@ class TopupScreen extends StatefulWidget {
 }
 
 class _TopupScreenState extends State<TopupScreen> {
+  String virtualAccount = " ";
+
+  @override
+  void initState() {
+    super.initState();
+    getVirtualAccount();
+  }
+
+  Future<void> getVirtualAccount() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user found.');
+    }
+    final response = await http.get(Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint3}/get-va?uid=${user.uid}'));
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final virtualAccount = json['virtualAccount'];
+      setState(() {
+        this.virtualAccount = virtualAccount;
+      });
+    } else {
+      throw Exception('Failed');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    String randomNumber = '';
-    for (int i = 0; i < 16; i++) {
-      randomNumber += Random().nextInt(10).toString();
-    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 240, 172, 27),
@@ -36,7 +60,7 @@ class _TopupScreenState extends State<TopupScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Virtual Account: $randomNumber',
+                'Virtual Account: $virtualAccount',
                 style: const TextStyle(fontSize: 15),
                 textAlign: TextAlign.center,
               ),

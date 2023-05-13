@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:walletapp/qrcodepage/qrscandata.dart';
 
 class QrCode extends StatefulWidget {
   const QrCode({Key? key}) : super(key: key);
@@ -17,6 +18,7 @@ class _QrCodeState extends State<QrCode> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  String? qrData;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -129,6 +131,14 @@ class _QrCodeState extends State<QrCode> {
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
+        qrData = result!.code;
+        if (result != null) {
+          controller.pauseCamera();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const QrScanData()),
+          );
+        }
       });
     });
   }

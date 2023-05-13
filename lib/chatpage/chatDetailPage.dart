@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
+import 'package:walletapp/chatpage/attachmentpage.dart';
 
 class ChatMessage extends StatelessWidget {
   const ChatMessage({
@@ -95,7 +96,12 @@ class _ChatDetailPageState extends State<ChatDetailPage>
         child: Row(
           children: <Widget>[
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AttachmentPage()));
+              },
               child: Container(
                 height: 31,
                 width: 31,
@@ -169,15 +175,10 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                   child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text(
+                children: const <Widget>[
+                  Text(
                     "Jane Russel",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Online",
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
                 ],
               )),

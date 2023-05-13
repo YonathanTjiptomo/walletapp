@@ -4,7 +4,7 @@ import 'package:walletapp/chatpage/chatscreen.dart';
 import 'package:walletapp/homescreen/homescreen.dart';
 import 'package:walletapp/loginpage.dart';
 import 'package:walletapp/profilePage.dart';
-import 'package:walletapp/qrcode.dart';
+import 'package:walletapp/qrcodepage/qrcode.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -8,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:walletapp/apiConstant.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -17,8 +16,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
   late ScaffoldMessengerState scaffoldMessenger;
 
   @override
@@ -31,124 +28,44 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Firebase Auth'),
+        centerTitle: true,
+        title: const Text('Login Page'),
+        backgroundColor: const Color.fromARGB(255, 240, 172, 27),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: "Email",
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              const SizedBox(height: 100),
+              SignInButton(
+                Buttons.Google,
+                onPressed: () async {
+                  try {
+                    UserCredential userCredential = await _signInWithGoogle();
+                    String? email = userCredential.user?.email;
+                    String? uid = userCredential.user?.uid;
+                    await sendUserData(email!, uid!);
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text("Logged in successfully"),
+                      ),
+                    );
+                  } on FirebaseAuthException catch (e) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text("Failed to log in: ${e.message}"),
+                      ),
+                    );
+                  }
+                },
               ),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: "Password",
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  UserCredential userCredential = await signInWithEmailPassword(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-                  String? email = userCredential.user?.email;
-                  String? uid = userCredential.user?.uid;
-                  await sendUserData(email!, uid!);
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text("Logged in successfully"),
-                    ),
-                  );
-                } on FirebaseAuthException catch (e) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text("Failed to log in: ${e.message}"),
-                    ),
-                  );
-                }
-              },
-              child: const Text("Log In"),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  UserCredential userCredential =
-                      await registerWithEmailPassword(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-                  String? email = userCredential.user?.email;
-                  String? uid = userCredential.user?.uid;
-                  await sendUserData(email!, uid!);
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text("Registered successfully"),
-                    ),
-                  );
-                } on FirebaseAuthException catch (e) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text("Failed to register: ${e.message}"),
-                    ),
-                  );
-                }
-              },
-              child: const Text("Register"),
-            ),
-            const SizedBox(height: 20),
-            SignInButton(
-              Buttons.Google,
-              onPressed: () async {
-                try {
-                  UserCredential userCredential = await _signInWithGoogle();
-                  String? email = userCredential.user?.email;
-                  String? uid = userCredential.user?.uid;
-                  await sendUserData(email!, uid!);
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text("Logged in successfully"),
-                    ),
-                  );
-                } on FirebaseAuthException catch (e) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text("Failed to log in: ${e.message}"),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Future<UserCredential> registerWithEmailPassword(
-      {required String email, required String password}) async {
-    return await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-  }
-
-  Future<UserCredential> signInWithEmailPassword(
-      {required String email, required String password}) async {
-    return await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
     );
   }
 
@@ -175,9 +92,8 @@ class _LoginPageState extends State<LoginPage> {
         });
 
     if (response.statusCode == 200) {
-      print(response.body);
     } else {
-      print("Failed to send user data to server");
+      throw Exception("Failed to send user data to server");
     }
   }
 }

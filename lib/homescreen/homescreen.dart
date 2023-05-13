@@ -141,41 +141,35 @@ class _HomescreenState extends State<Homescreen> {
                           TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  SingleChildScrollView(
-                    physics: const ScrollPhysics(),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey[200]!,
-                            spreadRadius: 10.0,
-                            blurRadius: 5,
-                          )
+                  Column(
+                    children: <Widget>[
+                      ListView(
+                        physics: const ScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        children: <Widget>[
+                          transaction == null
+                              ? const CircularProgressIndicator()
+                              : SizedBox(
+                                  height: 350,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.vertical,
+                                    shrinkWrap: true,
+                                    itemCount: transaction!.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      final datas = transaction![index];
+                                      return ListTile(
+                                        title: Text(datas.transactionId),
+                                        subtitle:
+                                            Text('Amount: ${datas.amount}'),
+                                      );
+                                    },
+                                  ),
+                                ),
                         ],
                       ),
-                      child: Center(
-                        child: transaction == null
-                            ? const CircularProgressIndicator()
-                            : ListView.builder(
-                                scrollDirection: Axis.vertical,
-                                shrinkWrap: true,
-                                itemCount: transaction!.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final datas = transaction![index];
-                                  return ListTile(
-                                    title: Text(datas.transactionId),
-                                    subtitle: Text('Amount: ${datas.amount}'),
-                                  );
-                                },
-                              ),
-                      ),
-                    ),
+                    ],
                   ),
                 ],
               ),
