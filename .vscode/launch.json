@@ -8,9 +8,6 @@
             "name": "walletapp",
             "request": "launch",
             "type": "dart",
-            "args": [
-                "--no-sound-null-safety"
-            ]
         },
         {
             "name": "walletapp (profile mode)",

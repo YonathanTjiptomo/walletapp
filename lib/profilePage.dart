@@ -12,7 +12,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final user = FirebaseAuth.instance.currentUser!;
-  static List<String> profilelist = ["Nomor Rekening", "Logout"];
+  static List<String> profilelist = ["Logout"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,25 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
             Column(
               children: <Widget>[
                 GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    alignment: Alignment.centerLeft,
-                    padding:
-                        const EdgeInsets.only(top: 17, bottom: 17, left: 12),
-                    decoration: const BoxDecoration(
-                        border: Border(
-                      bottom: BorderSide(),
-                    )),
-                    child: Text(
-                      profilelist[0],
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 22,
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
                   onTap: () {
                     FirebaseAuth.instance.signOut();
                   },
@@ -77,7 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     child: Text(
-                      profilelist[1],
+                      profilelist[0],
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 22,

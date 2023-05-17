@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:walletapp/apiConstant.dart';
+import 'package:walletapp/chatpage/chatDetailPage.dart';
 
 class SubmitAttachment extends StatefulWidget {
   const SubmitAttachment({super.key});
@@ -37,10 +38,7 @@ class _SubmitAttachmentState extends State<SubmitAttachment> {
           'amount': amountController.text,
           'message': messageController.text,
         }));
-    // ignore: avoid_print
     if (response.statusCode == 200) {
-      // ignore: void_checks
-      return (jsonDecode(response.body));
     } else {
       throw Exception('Failed to send money: ${response.statusCode}');
     }
@@ -74,10 +72,14 @@ class _SubmitAttachmentState extends State<SubmitAttachment> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   _submitForm();
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop();
+                  Navigator.pop(context);
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ChatDetailPage()));
                 },
                 child: const Text("Submit")),
           ],

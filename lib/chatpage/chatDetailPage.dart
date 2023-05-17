@@ -1,9 +1,14 @@
 // ignore_for_file: file_names
 
+import 'dart:async';
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:walletapp/apiConstant.dart';
 import 'package:walletapp/chatpage/attachmentpage.dart';
+import 'package:http/http.dart' as http;
 
-class ChatMessage extends StatelessWidget {
+class ChatMessage extends StatefulWidget {
   const ChatMessage({
     required this.text,
     required this.animationController,
@@ -13,10 +18,29 @@ class ChatMessage extends StatelessWidget {
   final AnimationController animationController;
 
   @override
+  ChatMessageState createState() => ChatMessageState();
+}
+
+class ChatMessageState extends State<ChatMessage>
+    with SingleTickerProviderStateMixin {
+  late final Animation<double> _animation;
+  late final AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = widget.animationController;
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    );
+    _animationController.forward();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizeTransition(
-      sizeFactor:
-          CurvedAnimation(parent: animationController, curve: Curves.easeOut),
+      sizeFactor: _animation,
       axisAlignment: 0.0,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 10.0),
@@ -36,7 +60,7 @@ class ChatMessage extends StatelessWidget {
                       color: Colors.lightBlue[300],
                     ),
                     padding: const EdgeInsets.all(9),
-                    child: Text(text),
+                    child: Text(widget.text),
                   ),
                 ],
               ),
@@ -52,12 +76,12 @@ class ChatDetailPage extends StatefulWidget {
   const ChatDetailPage({Key? key}) : super(key: key);
 
   @override
-  State<ChatDetailPage> createState() => _ChatDetailPageState();
+  State<ChatDetailPage> createState() => ChatDetailPageState();
 }
 
-class _ChatDetailPageState extends State<ChatDetailPage>
+class ChatDetailPageState extends State<ChatDetailPage>
     with TickerProviderStateMixin {
-  final List<ChatMessage> _messages = [];
+  List<ChatMessage> _messages = [];
   final _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isComposing = false;
@@ -66,7 +90,7 @@ class _ChatDetailPageState extends State<ChatDetailPage>
     setState(() {
       _isComposing = false;
     });
-    var message = ChatMessage(
+    var newMessage = ChatMessage(
       text: text,
       animationController: AnimationController(
         duration: const Duration(milliseconds: 700),
@@ -74,15 +98,83 @@ class _ChatDetailPageState extends State<ChatDetailPage>
       ),
     );
     setState(() {
-      _messages.insert(0, message);
+      _messages.insert(0, newMessage);
     });
     _focusNode.requestFocus();
-    message.animationController.forward();
+    newMessage.animationController.forward();
+  }
+
+  Future<List<String>> getMessages() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user found.');
+    }
+    final response = await http.post(
+      Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint5}/get-message?uid=${user.uid}'),
+      headers: {'Content-type': 'application/json'},
+      body: jsonEncode({}),
+    );
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      final reversedMessages = List<String>.from(jsonResponse.reversed);
+      return reversedMessages;
+    } else {
+      throw Exception('Failed to load messages');
+    }
+  }
+
+  void sendMessage() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user found.');
+    }
+    var url = Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint5}/send-message?uid=${user.uid}');
+    var response = await http.post(url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          'message': _textController.text,
+        }));
+    if (response.statusCode == 200) {
+    } else {
+      throw Exception('Failed to send money: ${response.statusCode}');
+    }
+  }
+
+  List<ChatMessage> _getNewMessages(List<String> newMessageStrings) {
+    return newMessageStrings
+        .map((message) => ChatMessage(
+              text: message,
+              animationController: AnimationController(
+                duration: const Duration(milliseconds: 700),
+                vsync: this,
+              ),
+            ))
+        .where((message) => mounted)
+        .toList();
+  }
+
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      final newMessageStrings = await getMessages();
+      if (newMessageStrings.isNotEmpty) {
+        final newMessages = _getNewMessages(newMessageStrings);
+        setState(() {
+          _messages = newMessages;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    for (var message in _messages) {
+    _timer.cancel();
+    for (final message in _messages) {
       message.animationController.dispose();
     }
     super.dispose();
@@ -97,10 +189,8 @@ class _ChatDetailPageState extends State<ChatDetailPage>
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AttachmentPage()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const AttachmentPage()));
               },
               child: Container(
                 height: 31,
@@ -122,7 +212,7 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                   _isComposing = text.isNotEmpty;
                 });
               },
-              onSubmitted: _isComposing ? _handleSubmitted : null,
+              onSubmitted: _handleSubmitted,
               decoration: InputDecoration(
                   hintText: 'Send a message',
                   hintStyle: TextStyle(color: Colors.grey.shade600),
@@ -134,15 +224,16 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                       borderSide: BorderSide(color: Colors.grey.shade100))),
               focusNode: _focusNode,
             )),
-            Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: IconButton(
-                  color: Colors.blue,
-                  icon: const Icon(Icons.send),
-                  onPressed: _isComposing
-                      ? () => _handleSubmitted(_textController.text)
-                      : null,
-                )),
+            IconButton(
+              color: Colors.blue,
+              icon: const Icon(Icons.send),
+              onPressed: _isComposing
+                  ? () async {
+                      sendMessage();
+                      _handleSubmitted(_textController.text);
+                    }
+                  : null,
+            ),
           ],
         ),
       ),
@@ -171,11 +262,11 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                 maxRadius: 20,
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                   child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const <Widget>[
+                children: <Widget>[
                   Text(
                     "Jane Russel",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
