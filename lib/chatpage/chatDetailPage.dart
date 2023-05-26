@@ -73,7 +73,10 @@ class ChatMessageState extends State<ChatMessage>
 }
 
 class ChatDetailPage extends StatefulWidget {
-  const ChatDetailPage({Key? key}) : super(key: key);
+  const ChatDetailPage({Key? key, required this.userIdFriend})
+      : super(key: key);
+
+  final String userIdFriend;
 
   @override
   State<ChatDetailPage> createState() => ChatDetailPageState();
@@ -82,6 +85,7 @@ class ChatDetailPage extends StatefulWidget {
 class ChatDetailPageState extends State<ChatDetailPage>
     with TickerProviderStateMixin {
   List<ChatMessage> _messages = [];
+
   final _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isComposing = false;
@@ -113,7 +117,7 @@ class ChatDetailPageState extends State<ChatDetailPage>
       Uri.parse(
           '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint5}/get-message?uid=${user.uid}'),
       headers: {'Content-type': 'application/json'},
-      body: jsonEncode({}),
+      body: jsonEncode({'userIdTo': widget.userIdFriend}),
     );
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -135,6 +139,7 @@ class ChatDetailPageState extends State<ChatDetailPage>
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           'message': _textController.text,
+          'userIdTo': widget.userIdFriend
         }));
     if (response.statusCode == 200) {
     } else {
@@ -155,7 +160,7 @@ class ChatDetailPageState extends State<ChatDetailPage>
         .toList();
   }
 
-  late Timer _timer;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -173,7 +178,7 @@ class ChatDetailPageState extends State<ChatDetailPage>
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     for (final message in _messages) {
       message.animationController.dispose();
     }
@@ -190,7 +195,8 @@ class ChatDetailPageState extends State<ChatDetailPage>
             GestureDetector(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const AttachmentPage()));
+                    builder: (context) =>
+                        AttachmentPage(userIdFriend: widget.userIdFriend)));
               },
               child: Container(
                 height: 31,
@@ -262,14 +268,15 @@ class ChatDetailPageState extends State<ChatDetailPage>
                 maxRadius: 20,
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                   child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    "Jane Russel",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    widget.userIdFriend,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ],
               )),

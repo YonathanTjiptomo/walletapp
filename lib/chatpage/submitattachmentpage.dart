@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +6,9 @@ import 'package:walletapp/apiConstant.dart';
 import 'package:walletapp/chatpage/chatDetailPage.dart';
 
 class SubmitAttachment extends StatefulWidget {
-  const SubmitAttachment({super.key});
+  const SubmitAttachment({super.key, required this.userIdFriend});
+
+  final String userIdFriend;
 
   @override
   State<SubmitAttachment> createState() => _SubmitAttachmentState();
@@ -37,6 +37,7 @@ class _SubmitAttachmentState extends State<SubmitAttachment> {
         body: jsonEncode({
           'amount': amountController.text,
           'message': messageController.text,
+          'userIdTo': widget.userIdFriend,
         }));
     if (response.statusCode == 200) {
     } else {
@@ -75,11 +76,13 @@ class _SubmitAttachmentState extends State<SubmitAttachment> {
                 onPressed: () async {
                   _submitForm();
                   Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                   Navigator.pop(context);
                   await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const ChatDetailPage()));
+                          builder: (context) => ChatDetailPage(
+                              userIdFriend: widget.userIdFriend)));
                 },
                 child: const Text("Submit")),
           ],

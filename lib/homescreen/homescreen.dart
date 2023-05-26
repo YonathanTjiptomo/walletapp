@@ -34,7 +34,7 @@ class _HomescreenState extends State<Homescreen> {
       throw Exception('No authenticated user found.');
     }
     final response = await http.get(Uri.parse(
-        '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint2}/get?uid=${user.uid}'));
+        '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint2}/get-money?uid=${user.uid}'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       final amount = json['amount'] as int;
@@ -47,7 +47,12 @@ class _HomescreenState extends State<Homescreen> {
   }
 
   Future<void> getData() async {
-    final url = Uri.parse(ApiConstants.baseUrl + ApiConstants.usersEndpoint);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user found.');
+    }
+    final url = Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint}?uid=${user.uid}');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

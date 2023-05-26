@@ -85,7 +85,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> sendUserData(String email, String uid) async {
     final response = await http.post(
-        Uri.parse(ApiConstants.baseUrl + ApiConstants.usersEndpoint3),
+        Uri.parse(
+            '${ApiConstants.baseUrl}${ApiConstants.usersEndpoint3}/save-user'),
         body: {
           'email': email,
           'uid': uid,

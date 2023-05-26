@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:walletapp/chatpage/submitattachmentpage.dart';
 
 class AttachmentPage extends StatefulWidget {
-  const AttachmentPage({super.key});
+  const AttachmentPage({super.key, required this.userIdFriend});
+
+  final String userIdFriend;
 
   @override
   State<AttachmentPage> createState() => _AttachmentPageState();
@@ -29,7 +31,8 @@ class _AttachmentPageState extends State<AttachmentPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const SubmitAttachment()));
+                          builder: (context) => SubmitAttachment(
+                              userIdFriend: widget.userIdFriend)));
                 },
                 child: Container(
                   alignment: Alignment.centerLeft,
