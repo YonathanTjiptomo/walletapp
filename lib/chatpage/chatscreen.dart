@@ -17,8 +17,7 @@ class _ChatScreenState extends State<ChatScreen> {
   // ignore: unused_field
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _textController = TextEditingController();
-  List<TbFriend>? friend;
-
+  List<TbFriend>? friends;
   @override
   void initState() {
     super.initState();
@@ -44,11 +43,13 @@ class _ChatScreenState extends State<ChatScreen> {
       body: jsonEncode({}),
     );
     if (response.statusCode == 200) {
+      final List<dynamic> friendDataList = json.decode(response.body);
       setState(() {
-        final friendJson = json.decode(response.body);
-        friend = List<TbFriend>.from(
-            friendJson.map((data) => TbFriend.fromJson(data)));
+        friends =
+            friendDataList.map((data) => TbFriend.fromJson(data)).toList();
       });
+    } else {
+      throw Exception("Failed");
     }
   }
 
@@ -86,16 +87,16 @@ class _ChatScreenState extends State<ChatScreen> {
               physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
-                  friend == null
+                  friends == null
                       ? const CircularProgressIndicator()
                       : SizedBox(
                           height: 350,
                           child: ListView.builder(
                             scrollDirection: Axis.vertical,
                             shrinkWrap: true,
-                            itemCount: friend!.length,
+                            itemCount: friends!.length,
                             itemBuilder: (BuildContext context, int index) {
-                              final datas = friend![index];
+                              final datas = friends![index];
                               return GestureDetector(
                                   onTap: () {
                                     Navigator.push(
@@ -103,12 +104,14 @@ class _ChatScreenState extends State<ChatScreen> {
                                       MaterialPageRoute(
                                         builder: (context) => ChatDetailPage(
                                             userIdFriend:
-                                                friend![index].userIdFriend),
+                                                friends![index].userIdFriend,
+                                            friendEmail:
+                                                friends![index].friendEmail),
                                       ),
                                     );
                                   },
                                   child: ListTile(
-                                      title: Text(datas.userIdFriend),
+                                      title: Text(datas.friendEmail),
                                       contentPadding: const EdgeInsets.all(8),
                                       shape: const Border(
                                           bottom: BorderSide(
@@ -144,8 +147,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 const SizedBox(width: 3),
                 IconButton(
                   onPressed: () async {
-                    addFriend();
-                    getFriend();
+                    await addFriend();
+                    await getFriend();
                   },
                   color: Colors.blue,
                   icon: const Icon(Icons.add_circle),

@@ -80,7 +80,7 @@ class _HomescreenState extends State<Homescreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const NotificationScreen()));
+                        builder: (context) => const NotificationPage()));
               },
               icon: const Icon(
                 Icons.notifications_outlined,

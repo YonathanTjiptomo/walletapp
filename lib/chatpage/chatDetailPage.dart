@@ -73,9 +73,11 @@ class ChatMessageState extends State<ChatMessage>
 }
 
 class ChatDetailPage extends StatefulWidget {
-  const ChatDetailPage({Key? key, required this.userIdFriend})
+  const ChatDetailPage(
+      {Key? key, required this.userIdFriend, required this.friendEmail})
       : super(key: key);
 
+  final String friendEmail;
   final String userIdFriend;
 
   @override
@@ -179,7 +181,7 @@ class ChatDetailPageState extends State<ChatDetailPage>
   @override
   void dispose() {
     _timer?.cancel();
-    for (final message in _messages) {
+    for (var message in _getNewMessages([])) {
       message.animationController.dispose();
     }
     super.dispose();
@@ -195,8 +197,9 @@ class ChatDetailPageState extends State<ChatDetailPage>
             GestureDetector(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        AttachmentPage(userIdFriend: widget.userIdFriend)));
+                    builder: (context) => AttachmentPage(
+                        userIdFriend: widget.userIdFriend,
+                        friendEmail: widget.friendEmail)));
               },
               child: Container(
                 height: 31,
@@ -274,7 +277,7 @@ class ChatDetailPageState extends State<ChatDetailPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    widget.userIdFriend,
+                    widget.friendEmail,
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w600),
                   ),

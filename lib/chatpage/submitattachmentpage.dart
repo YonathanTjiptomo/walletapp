@@ -6,8 +6,10 @@ import 'package:walletapp/apiConstant.dart';
 import 'package:walletapp/chatpage/chatDetailPage.dart';
 
 class SubmitAttachment extends StatefulWidget {
-  const SubmitAttachment({super.key, required this.userIdFriend});
+  const SubmitAttachment(
+      {super.key, required this.userIdFriend, required this.friendEmail});
 
+  final String friendEmail;
   final String userIdFriend;
 
   @override
@@ -82,7 +84,9 @@ class _SubmitAttachmentState extends State<SubmitAttachment> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => ChatDetailPage(
-                              userIdFriend: widget.userIdFriend)));
+                                userIdFriend: widget.userIdFriend,
+                                friendEmail: widget.friendEmail,
+                              )));
                 },
                 child: const Text("Submit")),
           ],
